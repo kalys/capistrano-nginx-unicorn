@@ -1,0 +1,67 @@
+upstream unicorn_<%= application %> {
+  server unix:/tmp/unicorn.<%= application %>.sock fail_timeout=0;
+}
+
+server {
+  listen 80;
+  server_name <%= nginx_server_name %>;
+  root <%= current_path %>/public;
+  try_files $uri/index.html $uri @unicorn_<%= application %>;
+
+  location @unicorn_<%= application %> {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_pass http://unicorn_<%= application %>;
+    # limit_req zone=one;
+    access_log <%= shared_path %>/log/nginx.access.log;
+    error_log <%= shared_path %>/log/nginx.error.log;
+  }
+
+  location ~ ^/(assets|images|javascripts|stylesheets|swfs|system)/ {
+    gzip_static on;
+    expires max;
+    add_header Cache-Control public;
+    add_header Last-Modified "";
+    add_header ETag "";
+
+    open_file_cache max=1000 inactive=500s;
+    open_file_cache_valid 600s;
+    open_file_cache_errors on;
+    break;
+  }
+
+  client_max_body_size 4G;
+  keepalive_timeout 10;
+
+  error_page 500 502 504 /500.html;
+  error_page 503 @503;
+
+  location = /50x.html {
+    root html;
+  }
+
+  location = /404.html {
+    root html;
+  }
+
+  location @503 {
+    error_page 405 = /system/maintenance.html;
+    if (-f $document_root/system/maintenance.html) {
+      rewrite ^(.*)$ /system/maintenance.html break;
+    }
+    rewrite ^(.*)$ /503.html break;
+  }
+
+  if ($request_method !~ ^(GET|HEAD|PUT|POST|DELETE|OPTIONS)$ ){
+    return 405;
+  }
+
+  if (-f $document_root/system/maintenance.html) {
+    return 503;
+  }
+
+  location ~ \.(php|html)$ {
+    return 405;
+  }
+}
