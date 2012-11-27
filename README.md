@@ -84,65 +84,70 @@ you can run any of these tasks to update configuration.
 
 You can customize nginx and unicorn configs using capistrano variables:
 
-    # path to customized templates (see below for details)
-    # default value: "config/deploy/templates"
-    set :templates_path, "config/deploy/templates"
 
-    # server name for nginx, default value: no (will be prompted if not set)
-    # set this to your site name as it is visible from outside
-    # this will allow 1 nginx to serve several sites with different `server_name`
-    set :nginx_server_name, "example.com"
+```ruby
+# path to customized templates (see below for details)
+# default value: "config/deploy/templates"
+set :templates_path, "config/deploy/templates"
 
-    # path, where unicorn pid file will be stored
-    # default value: `"#{current_path}/tmp/pids/unicorn.pid"`
-    set :unicorn_pid, "#{current_path}/tmp/pids/unicorn.pid"
+# server name for nginx, default value: no (will be prompted if not set)
+# set this to your site name as it is visible from outside
+# this will allow 1 nginx to serve several sites with different `server_name`
+set :nginx_server_name, "example.com"
 
-    # path, where unicorn config file will be stored
-    # default value: `"#{shared_path}/config/unicorn.rb"`
-    set :unicorn_config, "#{shared_path}/config/unicorn.rb"
+# path, where unicorn pid file will be stored
+# default value: `"#{current_path}/tmp/pids/unicorn.pid"`
+set :unicorn_pid, "#{current_path}/tmp/pids/unicorn.pid"
 
-    # path, where unicorn log file will be stored
-    # default value: `"#{shared_path}/config/unicorn.rb"`
-    set :unicorn_log, "#{shared_path}/config/unicorn.rb"
+# path, where unicorn config file will be stored
+# default value: `"#{shared_path}/config/unicorn.rb"`
+set :unicorn_config, "#{shared_path}/config/unicorn.rb"
 
-    # user name to run unicorn
-    # default value: `user` (user varibale defined in your `deploy.rb`)
-    set :unicorn_user, "user"
+# path, where unicorn log file will be stored
+# default value: `"#{shared_path}/config/unicorn.rb"`
+set :unicorn_log, "#{shared_path}/config/unicorn.rb"
 
-    # number of unicorn workers
-    # default value: no (will be prompted if not set)
-    set :unicorn_workers, 4
+# user name to run unicorn
+# default value: `user` (user varibale defined in your `deploy.rb`)
+set :unicorn_user, "user"
 
-    # if set, nginx will be configured to 443 port and port 80 will be auto rewritten to 443
-    # also, on `nginx:setup`, paths to ssl certificate and key will be configured
-    # and certificate file and key will be copied to `/etc/ssl/certs` and `/etc/ssl/private/` directories
-    # default value: false
-    set :nginx_use_ssl, false
+# number of unicorn workers
+# default value: no (will be prompted if not set)
+set :unicorn_workers, 4
 
-    # remote file name of the certificate, only makes sense if `nginx_use_ssl` is set
-    # default value: `nginx_server_name + ".crt"`
-    set :nginx_ssl_certificate, "#{nginx_server_name}.crt"
+# if set, nginx will be configured to 443 port and port 80 will be auto rewritten to 443
+# also, on `nginx:setup`, paths to ssl certificate and key will be configured
+# and certificate file and key will be copied to `/etc/ssl/certs` and `/etc/ssl/private/` directories
+# default value: false
+set :nginx_use_ssl, false
 
-    # remote file name of the certificate, only makes sense if `nginx_use_ssl` is set
-    # default value: `nginx_server_name + ".key"`
-    set :nginx_ssl_certificate_key, "#{nginx_server_name}.key"
+# remote file name of the certificate, only makes sense if `nginx_use_ssl` is set
+# default value: `nginx_server_name + ".crt"`
+set :nginx_ssl_certificate, "#{nginx_server_name}.crt"
 
-    # local path to file with certificate, only makes sense if `nginx_use_ssl` is set
-    # this file will be copied to remote server
-    # default value: none (will be prompted if not set)
-    set :nginx_ssl_certificate_local_path, "/home/ivalkeen/ssl/myssl.cert"
+# remote file name of the certificate, only makes sense if `nginx_use_ssl` is set
+# default value: `nginx_server_name + ".key"`
+set :nginx_ssl_certificate_key, "#{nginx_server_name}.key"
 
-    # local path to file with certificate key, only makes sense if `nginx_use_ssl` is set
-    # this file will be copied to remote server
-    # default value: none (will be prompted if not set)
-    set :nginx_ssl_certificate_key_local_path, "/home/ivalkeen/ssl/myssl.key"
+# local path to file with certificate, only makes sense if `nginx_use_ssl` is set
+# this file will be copied to remote server
+# default value: none (will be prompted if not set)
+set :nginx_ssl_certificate_local_path, "/home/ivalkeen/ssl/myssl.cert"
+
+# local path to file with certificate key, only makes sense if `nginx_use_ssl` is set
+# this file will be copied to remote server
+# default value: none (will be prompted if not set)
+set :nginx_ssl_certificate_key_local_path, "/home/ivalkeen/ssl/myssl.key"
+```
 
 For example, of you site name is `example.com` and you want to use 8 unicorn workers,
 your `deploy.rb` will look like this:
 
-    set :server_name, "example.com"
-    set :unicorn_workers, 4
-    require 'capistrano-nginx-unicorn'
+```ruby
+set :server_name, "example.com"
+set :unicorn_workers, 4
+require 'capistrano-nginx-unicorn'
+```
 
 ### Template Customization
 
