@@ -113,6 +113,30 @@ You can customize nginx and unicorn configs using capistrano variables:
     # default value: no (will be prompted if not set)
     set :unicorn_workers, 4
 
+    # if set, nginx will be configured to 443 port and port 80 will be auto rewritten to 443
+    # also, on `nginx:setup`, paths to ssl certificate and key will be configured
+    # and certificate file and key will be copied to `/etc/ssl/certs` and `/etc/ssl/private/` directories
+    # default value: false
+    set :nginx_use_ssl, false
+
+    # remote file name of the certificate, only makes sense if `nginx_use_ssl` is set
+    # default value: `nginx_server_name + ".crt"`
+    set :nginx_ssl_certificate, "#{nginx_server_name}.crt"
+
+    # remote file name of the certificate, only makes sense if `nginx_use_ssl` is set
+    # default value: `nginx_server_name + ".key"`
+    set :nginx_ssl_certificate_key, "#{nginx_server_name}.key"
+
+    # local path to file with certificate, only makes sense if `nginx_use_ssl` is set
+    # this file will be copied to remote server
+    # default value: none (will be prompted if not set)
+    set :nginx_ssl_certificate_local_path, "/home/ivalkeen/ssl/myssl.cert"
+
+    # local path to file with certificate key, only makes sense if `nginx_use_ssl` is set
+    # this file will be copied to remote server
+    # default value: none (will be prompted if not set)
+    set :nginx_ssl_certificate_key_local_path, "/home/ivalkeen/ssl/myssl.key"
+
 For example, of you site name is `example.com` and you want to use 8 unicorn workers,
 your `deploy.rb` will look like this:
 

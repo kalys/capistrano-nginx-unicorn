@@ -4,6 +4,11 @@ Capistrano::Configuration.instance.load do
   set_default(:templates_path, "config/deploy/templates")
 
   set_default(:nginx_server_name) { Capistrano::CLI.ui.ask "Nginx server name: " }
+  set_default(:nginx_use_ssl, false)
+  set_default(:nginx_ssl_certificate, "#{nginx_server_name}.crt")
+  set_default(:nginx_ssl_certificate_key, "#{nginx_server_name}.key")
+  set_default(:nginx_ssl_certificate_local_path) {Capistrano::CLI.ui.ask "Local path to ssl certificate: "}
+  set_default(:nginx_ssl_certificate_key_local_path) {Capistrano::CLI.ui.ask "Local path to ssl certificate key: "}
 
   set_default(:unicorn_pid, "#{current_path}/tmp/pids/unicorn.pid")
   set_default(:unicorn_config, "#{shared_path}/config/unicorn.rb")
@@ -17,6 +22,17 @@ Capistrano::Configuration.instance.load do
       template("nginx_conf.erb", "/tmp/#{application}")
       run "#{sudo} mv /tmp/#{application} /etc/nginx/sites-available/#{application}"
       run "#{sudo} ln -fs /etc/nginx/sites-available/#{application} /etc/nginx/sites-enabled/#{application}"
+
+      if nginx_use_ssl
+        put File.read(nginx_ssl_certificate_local_path), "/tmp/#{nginx_ssl_certificate}"
+        put File.read(nginx_ssl_certificate_key_local_path), "/tmp/#{nginx_ssl_certificate_key}"
+
+        run "#{sudo} mv /tmp/#{nginx_ssl_certificate} /etc/ssl/certs/#{nginx_ssl_certificate}"
+        run "#{sudo} mv /tmp/#{nginx_ssl_certificate_key} /etc/ssl/private/#{nginx_ssl_certificate_key}"
+
+        run "#{sudo} chown root:root /etc/ssl/certs/#{nginx_ssl_certificate}"
+        run "#{sudo} chown root:root /etc/ssl/private/#{nginx_ssl_certificate_key}"
+      end
     end
 
     after "deploy:setup", "nginx:setup"

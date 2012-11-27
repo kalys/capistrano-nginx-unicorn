@@ -2,8 +2,23 @@ upstream unicorn_<%= application %> {
   server unix:/tmp/unicorn.<%= application %>.sock fail_timeout=0;
 }
 
+<% if nginx_use_ssl %>
 server {
   listen 80;
+  rewrite ^(.*) https://$host$1 permanent;
+}
+<% end %>
+
+server {
+<% if nginx_use_ssl %>
+  listen 443;
+  ssl on;
+  ssl_certificate /etc/ssl/certs/<%= nginx_ssl_certificate %>;
+  ssl_certificate_key /etc/ssl/private/<%= nginx_ssl_certificate_key %>;
+<% else %>
+  listen 80;
+<% end %>
+
   server_name <%= nginx_server_name %>;
   root <%= current_path %>/public;
   try_files $uri/index.html $uri @unicorn_<%= application %>;
