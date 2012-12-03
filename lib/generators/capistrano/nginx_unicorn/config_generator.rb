@@ -12,6 +12,7 @@ module Capistrano
           copy_file "nginx_conf.erb", "#{templates_path}/nginx_conf.erb"
           copy_file "unicorn.rb.erb", "#{templates_path}/unicorn.rb.erb"
           copy_file "unicorn_init.erb", "#{templates_path}/unicorn_init.erb"
+          copy_file "logrotate.erb", "#{templates_path}/logrotate.erb"
         end
       end
     end

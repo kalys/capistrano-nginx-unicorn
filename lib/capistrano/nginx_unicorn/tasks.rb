@@ -67,6 +67,15 @@ Capistrano::Configuration.instance.load do
     end
   end
 
+  desc "Setup logs rotation for nginx and unicorn"
+  task :logrotate, roles: [:web, :app] do
+    template("logrotate.erb", "/tmp/#{application}_logrotate")
+    run "#{sudo} mv /tmp/#{application}_logrotate /etc/logrotate.d/#{application}"
+    run "#{sudo} chown root:root /etc/logrotate.d/#{application}"
+  end
+
+  after "deploy:setup", "logrotate"
+
   def template(template_name, target)
     config_file = "#{templates_path}/#{template_name}"
     # if no customized file, proceed with default

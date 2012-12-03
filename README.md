@@ -8,6 +8,7 @@ Provides capistrano tasks to:
 * create unicorn init script for application, so it will be automatically started when OS restarts
 * start/stop unicorn (also can be done using `sudo service unicorn_<your_app> start/stop`)
 * reload unicorn using `USR2` signal to load new application version with zero downtime
+* creates logrotate record to rotate application logs
 
 Provides several capistrano variables for easy customization.
 Also, for full customization, all configs can be copied to the application using generators.
@@ -65,14 +66,19 @@ and for unicorn:
     # then old workers will be automatically killed and new workers will start processing requests
     cap unicorn:reload
 
+and shared:
+
+    # create logrotate record to rotate application logs
+    cap logrotate
+
 There is no need to execute any of these tasks manually.
 They will be called automatically on different deploy stages:
 
-* `nginx:setup`, `nginx:reload` and `unicorn:setup` are hooked to `deploy:setup`
+* `nginx:setup`, `nginx:reload`, `unicorn:setup` and `logrotate` are hooked to `deploy:setup`
 * `unicorn:restart` is hooked to `deploy:restart`
 
 This means that if you run `cap deploy:setup`,
-nginx and unicorn will be automatically configured
+nginx and unicorn will be automatically configured.
 And after each deploy, unicorn will be automatically reloaded.
 
 However, if you changed variables or customized templates,
