@@ -1,12 +1,16 @@
 require 'capistrano'
 
 Capistrano::Configuration.instance.load do
+  def set_default(name, *args, &block)
+    set(name, *args, &block) unless exists?(name)
+  end
+
   set_default(:templates_path, "config/deploy/templates")
 
   set_default(:nginx_server_name) { Capistrano::CLI.ui.ask "Nginx server name: " }
   set_default(:nginx_use_ssl, false)
-  set_default(:nginx_ssl_certificate, "#{nginx_server_name}.crt")
-  set_default(:nginx_ssl_certificate_key, "#{nginx_server_name}.key")
+  set_default(:nginx_ssl_certificate) { "#{nginx_server_name}.crt" }
+  set_default(:nginx_ssl_certificate_key) { "#{nginx_server_name}.key" }
   set_default(:nginx_ssl_certificate_local_path) {Capistrano::CLI.ui.ask "Local path to ssl certificate: "}
   set_default(:nginx_ssl_certificate_key_local_path) {Capistrano::CLI.ui.ask "Local path to ssl certificate key: "}
 
@@ -84,4 +88,5 @@ Capistrano::Configuration.instance.load do
     end
     put ERB.new(File.read(config_file)).result(binding), target
   end
+
 end
