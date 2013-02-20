@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ### BEGIN INIT INFO
 # Provides: unicorn
 # Required-Start: $remote_fs $syslog
@@ -14,7 +14,7 @@ set -e
 TIMEOUT=${TIMEOUT-60}
 APP_ROOT=<%= current_path %>
 PID=<%= unicorn_pid %>
-CMD="cd <%= current_path %>; bundle exec unicorn -D -c <%= unicorn_config %> -E production"
+CMD="cd <%= current_path %>; source \"/home/<%= user %>/.rvm/environments/<%= rvm_ruby_string %>\"; bundle exec unicorn -D -c <%= unicorn_config %> -E production"
 AS_USER=<%= unicorn_user %>
 set -u
 
