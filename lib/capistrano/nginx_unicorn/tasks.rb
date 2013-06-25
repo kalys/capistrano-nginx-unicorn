@@ -80,6 +80,8 @@ Capistrano::Configuration.instance.load do
 
   after "deploy:setup", "logrotate"
 
+  after "deploy", "deploy:cleanup"
+
   def template(template_name, target)
     config_file = "#{templates_path}/#{template_name}"
     # if no customized file, proceed with default
