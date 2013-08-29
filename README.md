@@ -127,6 +127,10 @@ set :unicorn_workers, 4
 # default value: false
 set :nginx_use_ssl, false
 
+# if set, it will ask to upload certificates from a local path. Otherwise, it will expect
+# the certificate and key defined in the next 2 variables to be already in the server.
+set :nginx_upload_local_certificate, { true }
+
 # remote file name of the certificate, only makes sense if `nginx_use_ssl` is set
 # default value: `nginx_server_name + ".crt"`
 set :nginx_ssl_certificate, "#{nginx_server_name}.crt"
