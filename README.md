@@ -64,7 +64,7 @@ and for unicorn:
     # reload unicorn with no downtime
     # old workers will process new request until new master is fully loaded
     # then old workers will be automatically killed and new workers will start processing requests
-    cap unicorn:reload
+    cap unicorn:restart
 
 and shared:
 
