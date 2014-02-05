@@ -21,13 +21,19 @@ Capistrano::Configuration.instance.load do
   set_default(:unicorn_log) { "#{shared_path}/log/unicorn.log" }
   set_default(:unicorn_user) { user }
   set_default(:unicorn_workers) { Capistrano::CLI.ui.ask "Number of unicorn workers: " }
+  
+  set_default(:nginx_config_path) { "/etc/nginx/sites-available" }
 
   namespace :nginx do
     desc "Setup nginx configuration for this application"
     task :setup, roles: :web do
       template("nginx_conf.erb", "/tmp/#{application}")
-      run "#{sudo} mv /tmp/#{application} /etc/nginx/sites-available/#{application}"
-      run "#{sudo} ln -fs /etc/nginx/sites-available/#{application} /etc/nginx/sites-enabled/#{application}"
+      if nginx_config_path == "/etc/nginx/sites-available"
+          run "#{sudo} mv /tmp/#{application} /etc/nginx/sites-available/#{application}"
+          run "#{sudo} ln -fs /etc/nginx/sites-available/#{application} /etc/nginx/sites-enabled/#{application}"
+      else
+          run "#{sudo} mv /tmp/#{application} #{nginx_config_path}/#{application}.conf"
+      end
 
       if nginx_use_ssl
         if nginx_upload_local_certificate
