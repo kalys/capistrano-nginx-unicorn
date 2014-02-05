@@ -9,6 +9,7 @@ Capistrano::Configuration.instance.load do
 
   set_default(:nginx_server_name) { Capistrano::CLI.ui.ask "Nginx server name: " }
   set_default(:nginx_use_ssl, false)
+  set_default(:nginx_pid) { "/run/nginx.pid" }
   set_default(:nginx_ssl_certificate) { "#{nginx_server_name}.crt" }
   set_default(:nginx_ssl_certificate_key) { "#{nginx_server_name}.key" }
   set_default(:nginx_upload_local_certificate) { true }

@@ -105,6 +105,10 @@ set :nginx_server_name, "example.com"
 # default value: `"#{current_path}/tmp/pids/unicorn.pid"`
 set :unicorn_pid, "#{current_path}/tmp/pids/unicorn.pid"
 
+# path, where nginx pid file will be stored (used in logrotate recipe)
+# default value: `"/run/nginx.pid"`
+set :nginx_pid, "/run/nginx.pid"
+
 # path, where unicorn config file will be stored
 # default value: `"#{shared_path}/config/unicorn.rb"`
 set :unicorn_config, "#{shared_path}/config/unicorn.rb"
