@@ -67,13 +67,6 @@ namespace :nginx do
   end
 end
 
-namespace :deploy do
-
-  after :setup, "nginx:setup"
-  after :setup, "nginx:reload"
-
-end
-
 namespace :unicorn do
   desc "Setup Unicorn initializer and app configuration"
   task :setup do
@@ -87,8 +80,6 @@ namespace :unicorn do
     end
   end
 
-  after "deploy:setup", "unicorn:setup"
-
   %w[start stop restart].each do |command|
     desc "#{command} unicorn"
     task command do
@@ -96,9 +87,8 @@ namespace :unicorn do
         execute "service unicorn_#{application} #{command}"
       end
     end
-
-    after "deploy:#{command}", "unicorn:#{command}"
   end
+
 end
 
 desc "Setup logs rotation for nginx and unicorn"
@@ -110,5 +100,17 @@ task :logrotate do
   end
 end
 
-after "deploy:setup", "logrotate"
+namespace :deploy do
+
+  after :setup, "nginx:setup"
+  after :setup, "nginx:reload"
+  after :setup, "unicorn:setup"
+
+  %w[start stop restart].each do |command|
+    after command.to_sym, "unicorn:#{command}"
+  end
+
+  after :setup, "logrotate"
+end
+
 
