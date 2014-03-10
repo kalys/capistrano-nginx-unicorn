@@ -105,12 +105,10 @@ namespace :deploy do
   after :finishing, "nginx:setup"
   after :finishing, "nginx:reload"
   after :finishing, "unicorn:setup"
-
-#  %w[start stop restart].each do |command|
-#    after command.to_sym, "unicorn:#{command}"
-#  end
-
+  after :finishing, "unicorn:start"
+  after :restart, "unicorn:restart"
   after :finishing, "logrotate"
+
 end
 
 
