@@ -34,55 +34,63 @@ set_default(:nginx_config_path) { "/etc/nginx/sites-available" }
 
 namespace :nginx do
   desc "Setup nginx configuration for this application"
-  task :setup, roles: :web do
-               template("nginx_conf.erb", "/tmp/#{application}")
-               if nginx_config_path == "/etc/nginx/sites-available"
-                 execute "#{sudo} mv /tmp/#{application} /etc/nginx/sites-available/#{application}"
-                 execute "#{sudo} ln -fs /etc/nginx/sites-available/#{application} /etc/nginx/sites-enabled/#{application}"
-               else
-                 execute "#{sudo} mv /tmp/#{application} #{nginx_config_path}/#{application}.conf"
-               end
+  task :setup do
+    on roles(:web) do
+      template("nginx_conf.erb", "/tmp/#{application}")
+      if nginx_config_path == "/etc/nginx/sites-available"
+        execute "#{sudo} mv /tmp/#{application} /etc/nginx/sites-available/#{application}"
+        execute "#{sudo} ln -fs /etc/nginx/sites-available/#{application} /etc/nginx/sites-enabled/#{application}"
+      else
+        execute "#{sudo} mv /tmp/#{application} #{nginx_config_path}/#{application}.conf"
+      end
 
-               if nginx_use_ssl
-                 if nginx_upload_local_certificate
-                   put File.read(nginx_ssl_certificate_local_path), "/tmp/#{nginx_ssl_certificate}"
-                   put File.read(nginx_ssl_certificate_key_local_path), "/tmp/#{nginx_ssl_certificate_key}"
-
-                   execute "#{sudo} mv /tmp/#{nginx_ssl_certificate} /etc/ssl/certs/#{nginx_ssl_certificate}"
-                   execute "#{sudo} mv /tmp/#{nginx_ssl_certificate_key} /etc/ssl/private/#{nginx_ssl_certificate_key}"
-                 end
-
-                 execute "#{sudo} chown root:root /etc/ssl/certs/#{nginx_ssl_certificate}"
-                 execute "#{sudo} chown root:root /etc/ssl/private/#{nginx_ssl_certificate_key}"
-               end
-             end
+      if nginx_use_ssl
+        if nginx_upload_local_certificate
+          put File.read(nginx_ssl_certificate_local_path), "/tmp/#{nginx_ssl_certificate}"
+          put File.read(nginx_ssl_certificate_key_local_path), "/tmp/#{nginx_ssl_certificate_key}"
+          
+          execute "#{sudo} mv /tmp/#{nginx_ssl_certificate} /etc/ssl/certs/#{nginx_ssl_certificate}"
+          execute "#{sudo} mv /tmp/#{nginx_ssl_certificate_key} /etc/ssl/private/#{nginx_ssl_certificate_key}"
+        end
+        
+        execute "#{sudo} chown root:root /etc/ssl/certs/#{nginx_ssl_certificate}"
+        execute "#{sudo} chown root:root /etc/ssl/private/#{nginx_ssl_certificate_key}"
+      end
+    end
+  end
 
   after "deploy:setup", "nginx:setup"
   after "deploy:setup", "nginx:reload"
 
   desc "Reload nginx configuration"
-  task :reload, roles: :web do
-                execute "#{sudo} /etc/init.d/nginx reload"
-              end
+  task :reload do
+    on roles(:web) do
+      execute "#{sudo} /etc/init.d/nginx reload"
+    end
+  end
 end
 
 namespace :unicorn do
   desc "Setup Unicorn initializer and app configuration"
-  task :setup, roles: :app do
-               execute "mkdir -p #{shared_path}/config"
-               template "unicorn.rb.erb", unicorn_config
-               template "unicorn_init.erb", "/tmp/unicorn_init"
-               execute "chmod +x /tmp/unicorn_init"
-               execute "#{sudo} mv /tmp/unicorn_init /etc/init.d/unicorn_#{application}"
-               execute "#{sudo} update-rc.d -f unicorn_#{application} defaults"
-             end
+  task :setup do
+    on roles(:app) do
+      execute "mkdir -p #{shared_path}/config"
+      template "unicorn.rb.erb", unicorn_config
+      template "unicorn_init.erb", "/tmp/unicorn_init"
+      execute "chmod +x /tmp/unicorn_init"
+      execute "#{sudo} mv /tmp/unicorn_init /etc/init.d/unicorn_#{application}"
+      execute "#{sudo} update-rc.d -f unicorn_#{application} defaults"
+    end
+  end
 
   after "deploy:setup", "unicorn:setup"
 
   %w[start stop restart].each do |command|
     desc "#{command} unicorn"
-    task command, roles: :app do
-      execute "service unicorn_#{application} #{command}"
+    task command do
+      on roles(:app) do
+        execute "service unicorn_#{application} #{command}"
+      end
     end
 
     after "deploy:#{command}", "unicorn:#{command}"
@@ -90,10 +98,12 @@ namespace :unicorn do
 end
 
 desc "Setup logs rotation for nginx and unicorn"
-task :logrotate, roles: [:web, :app] do
-  template("logrotate.erb", "/tmp/#{application}_logrotate")
-  execute "#{sudo} mv /tmp/#{application}_logrotate /etc/logrotate.d/#{application}"
-  execute "#{sudo} chown root:root /etc/logrotate.d/#{application}"
+task :logrotate do
+  on roles(:web, :app) do
+    template("logrotate.erb", "/tmp/#{application}_logrotate")
+    execute "#{sudo} mv /tmp/#{application}_logrotate /etc/logrotate.d/#{application}"
+    execute "#{sudo} chown root:root /etc/logrotate.d/#{application}"
+  end
 end
 
 after "deploy:setup", "logrotate"
