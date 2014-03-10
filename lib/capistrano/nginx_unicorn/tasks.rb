@@ -1,7 +1,7 @@
 require 'capistrano'
 
 def set_default(name, *args, &block)
-  set(name, *args, &block) unless fetch(name).present?
+  set(name, *args, &block) unless fetch(name).nil?
 end
 
 def template(template_name, target)
