@@ -59,15 +59,19 @@ namespace :nginx do
     end
   end
 
-  after "deploy:setup", "nginx:setup"
-  after "deploy:setup", "nginx:reload"
-
   desc "Reload nginx configuration"
   task :reload do
     on roles(:web) do
       execute "#{sudo} /etc/init.d/nginx reload"
     end
   end
+end
+
+namespace :deploy do
+
+  after :setup, "nginx:setup"
+  after :setup, "nginx:reload"
+
 end
 
 namespace :unicorn do
