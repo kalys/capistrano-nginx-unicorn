@@ -2,8 +2,8 @@ require 'capistrano'
 require 'erb'
 require 'byebug'
 
-def set_default(name, *args, &block)
-  set(name, *args, &block) if fetch(name).nil?
+def set_default(name, value)
+  set(name, value) if fetch(name).nil?
 end
 
 def template(template_name, target)
@@ -18,20 +18,20 @@ end
 
 set_default(:templates_path, "config/deploy/templates")
 
-set_default(:nginx_server_name) { Capistrano::CLI.ui.ask "Nginx server name: " }
+set_default(:nginx_server_name, proc { ask(:nginx_server_name, "Nginx server name: ") })
 set_default(:nginx_use_ssl, false)
 set_default(:nginx_pid, "/run/nginx.pid")
-set_default(:nginx_ssl_certificate) { "#{fetch(:nginx_server_name)}.crt" }
-set_default(:nginx_ssl_certificate_key) { "#{fetch(:nginx_server_name)}.key" }
+set_default(:nginx_ssl_certificate, "#{fetch(:nginx_server_name)}.crt")
+set_default(:nginx_ssl_certificate_key, "#{fetch(:nginx_server_name)}.key")
 set_default(:nginx_upload_local_certificate, true)
-set_default(:nginx_ssl_certificate_local_path) { Capistrano::CLI.ui.ask "Local path to ssl certificate: " }
-set_default(:nginx_ssl_certificate_key_local_path) { Capistrano::CLI.ui.ask "Local path to ssl certificate key: " }
+set_default(:nginx_ssl_certificate_local_path, proc { ask(:nginx_ssl_certificate_local_path, "Local path to ssl certificate: ") })
+set_default(:nginx_ssl_certificate_key_local_path, proc { ask(:nginx_ssl_certificate_key_local_path, "Local path to ssl certificate key: ") })
 
 set_default(:unicorn_pid, shared_path.join("pids/unicorn.pid"))
 set_default(:unicorn_config, shared_path.join("config/unicorn.rb"))
 set_default(:unicorn_log, shared_path.join("log/unicorn.log"))
-set_default(:unicorn_user) { user }
-set_default(:unicorn_workers) { Capistrano::CLI.ui.ask "Number of unicorn workers: " }
+set_default(:unicorn_user, fetch(:user))
+set_default(:unicorn_workers, proc { ask(:unicorn_workers, "Number of unicorn workers: ") })
 
 set_default(:nginx_config_path, "/etc/nginx/sites-available")
 
