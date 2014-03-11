@@ -27,7 +27,7 @@ set_default(:nginx_upload_local_certificate, true)
 set_default(:nginx_ssl_certificate_local_path) { Capistrano::CLI.ui.ask "Local path to ssl certificate: " }
 set_default(:nginx_ssl_certificate_key_local_path) { Capistrano::CLI.ui.ask "Local path to ssl certificate key: " }
 
-set_default(:unicorn_pid, current_path.join("tmp/pids/unicorn.pid"))
+set_default(:unicorn_pid, current_path.join("tmp/unicorn.pid"))
 set_default(:unicorn_config, shared_path.join("config/unicorn.rb"))
 set_default(:unicorn_log, shared_path.join("log/unicorn.log"))
 set_default(:unicorn_user) { user }
