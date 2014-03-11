@@ -1,7 +1,9 @@
 require 'capistrano'
+require 'erb'
+require 'byebug'
 
 def set_default(name, *args, &block)
-  set(name, *args, &block) unless fetch(name).nil?
+  set(name, *args, &block) if fetch(name).nil?
 end
 
 def template(template_name, target)
@@ -11,6 +13,7 @@ def template(template_name, target)
     config_file = File.join(File.dirname(__FILE__), "../../generators/capistrano/nginx_unicorn/templates/#{template_name}")
   end
   config_stream = StringIO.new(ERB.new(File.read(config_file)).result(binding))
+  byebug
   upload! config_stream, target
 end
 
@@ -18,20 +21,20 @@ set_default(:templates_path, "config/deploy/templates")
 
 set_default(:nginx_server_name) { Capistrano::CLI.ui.ask "Nginx server name: " }
 set_default(:nginx_use_ssl, false)
-set_default(:nginx_pid) { "/run/nginx.pid" }
-set_default(:nginx_ssl_certificate) { "#{nginx_server_name}.crt" }
-set_default(:nginx_ssl_certificate_key) { "#{nginx_server_name}.key" }
-set_default(:nginx_upload_local_certificate) { true }
-set_default(:nginx_ssl_certificate_local_path) {Capistrano::CLI.ui.ask "Local path to ssl certificate: "}
-set_default(:nginx_ssl_certificate_key_local_path) {Capistrano::CLI.ui.ask "Local path to ssl certificate key: "}
+set_default(:nginx_pid, "/run/nginx.pid")
+set_default(:nginx_ssl_certificate) { "#{fetch(:nginx_server_name)}.crt" }
+set_default(:nginx_ssl_certificate_key) { "#{fetch(:nginx_server_name)}.key" }
+set_default(:nginx_upload_local_certificate, true)
+set_default(:nginx_ssl_certificate_local_path) { Capistrano::CLI.ui.ask "Local path to ssl certificate: " }
+set_default(:nginx_ssl_certificate_key_local_path) { Capistrano::CLI.ui.ask "Local path to ssl certificate key: " }
 
-set_default(:unicorn_pid) { "#{current_path}/tmp/pids/unicorn.pid" }
-set_default(:unicorn_config) { "#{shared_path}/config/unicorn.rb" }
-set_default(:unicorn_log) { "#{shared_path}/log/unicorn.log" }
+set_default(:unicorn_pid, current_path.join("tmp/pids/unicorn.pid"))
+set_default(:unicorn_config, shared_path.join("config/unicorn.rb"))
+set_default(:unicorn_log, shared_path.join("log/unicorn.log"))
 set_default(:unicorn_user) { user }
 set_default(:unicorn_workers) { Capistrano::CLI.ui.ask "Number of unicorn workers: " }
 
-set_default(:nginx_config_path) { "/etc/nginx/sites-available" }
+set_default(:nginx_config_path, "/etc/nginx/sites-available")
 
 namespace :nginx do
   desc "Setup nginx configuration for this application"
