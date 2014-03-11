@@ -36,12 +36,12 @@ namespace :nginx do
   desc "Setup nginx configuration for this application"
   task :setup do
     on roles(:web) do
-      template("nginx_conf.erb", "/tmp/#{application}")
+      template("nginx_conf.erb", "/tmp/#{fetch(:application)}")
       if nginx_config_path == "/etc/nginx/sites-available"
-        execute "#{sudo} mv /tmp/#{application} /etc/nginx/sites-available/#{application}"
-        execute "#{sudo} ln -fs /etc/nginx/sites-available/#{application} /etc/nginx/sites-enabled/#{application}"
+        execute "#{sudo} mv /tmp/#{fetch(:application)} /etc/nginx/sites-available/#{fetch(:application)}"
+        execute "#{sudo} ln -fs /etc/nginx/sites-available/#{fetch(:application)} /etc/nginx/sites-enabled/#{fetch(:application)}"
       else
-        execute "#{sudo} mv /tmp/#{application} #{nginx_config_path}/#{application}.conf"
+        execute "#{sudo} mv /tmp/#{fetch(:application)} #{nginx_config_path}/#{fetch(:application)}.conf"
       end
 
       if nginx_use_ssl
@@ -75,8 +75,8 @@ namespace :unicorn do
       template "unicorn.rb.erb", unicorn_config
       template "unicorn_init.erb", "/tmp/unicorn_init"
       execute "chmod +x /tmp/unicorn_init"
-      execute "#{sudo} mv /tmp/unicorn_init /etc/init.d/unicorn_#{application}"
-      execute "#{sudo} update-rc.d -f unicorn_#{application} defaults"
+      execute "#{sudo} mv /tmp/unicorn_init /etc/init.d/unicorn_#{fetch(:application)}"
+      execute "#{sudo} update-rc.d -f unicorn_#{fetch(:application)} defaults"
     end
   end
 
@@ -84,7 +84,7 @@ namespace :unicorn do
     desc "#{command} unicorn"
     task command do
       on roles(:app) do
-        execute "service unicorn_#{application} #{command}"
+        execute "service unicorn_#{fetch(:application)} #{command}"
       end
     end
   end
@@ -94,9 +94,9 @@ end
 desc "Setup logs rotation for nginx and unicorn"
 task :logrotate do
   on roles(:web, :app) do
-    template("logrotate.erb", "/tmp/#{application}_logrotate")
-    execute "#{sudo} mv /tmp/#{application}_logrotate /etc/logrotate.d/#{application}"
-    execute "#{sudo} chown root:root /etc/logrotate.d/#{application}"
+    template("logrotate.erb", "/tmp/#{fetch(:application)}_logrotate")
+    execute "#{sudo} mv /tmp/#{fetch(:application)}_logrotate /etc/logrotate.d/#{fetch(:application)}"
+    execute "#{sudo} chown root:root /etc/logrotate.d/#{fetch(:application)}"
   end
 end
 
