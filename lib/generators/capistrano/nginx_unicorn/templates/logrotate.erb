@@ -7,7 +7,7 @@
   delaycompress
 
   lastaction
-    pid=<%= unicorn_pid %>
+    pid=<%= fetch(:unicorn_pid) %>
     test -s $pid && kill -USR1 "$(cat $pid)"
   endscript
 
@@ -18,7 +18,7 @@
   endscript
 
   postrotate
-    nginx_pid=<%= nginx_pid %>
+    nginx_pid=<%= fetch(:nginx_pid) %>
     [ ! -f $nginx_pid ] || kill -USR1 `cat $nginx_pid`
   endscript
 }
