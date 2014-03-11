@@ -13,7 +13,6 @@ def template(template_name, target)
     config_file = File.join(File.dirname(__FILE__), "../../generators/capistrano/nginx_unicorn/templates/#{template_name}")
   end
   config_stream = StringIO.new(ERB.new(File.read(config_file)).result(binding))
-  byebug
   upload! config_stream, target
 end
 
