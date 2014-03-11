@@ -10,7 +10,8 @@ def template(template_name, target)
   unless File.exists?(config_file)
     config_file = File.join(File.dirname(__FILE__), "../../generators/capistrano/nginx_unicorn/templates/#{template_name}")
   end
-  put ERB.new(File.read(config_file)).result(binding), target
+  config_stream = StringIO.new(ERB.new(File.read(config_file)).result(binding))
+  upload! config_stream, target
 end
 
 set_default(:templates_path, "config/deploy/templates")
@@ -37,24 +38,24 @@ namespace :nginx do
   task :setup do
     on roles(:web) do
       template("nginx_conf.erb", "/tmp/#{fetch(:application)}")
-      if nginx_config_path == "/etc/nginx/sites-available"
+      if fetch(:nginx_config_path) == "/etc/nginx/sites-available"
         execute "#{sudo} mv /tmp/#{fetch(:application)} /etc/nginx/sites-available/#{fetch(:application)}"
         execute "#{sudo} ln -fs /etc/nginx/sites-available/#{fetch(:application)} /etc/nginx/sites-enabled/#{fetch(:application)}"
       else
-        execute "#{sudo} mv /tmp/#{fetch(:application)} #{nginx_config_path}/#{fetch(:application)}.conf"
+        execute "#{sudo} mv /tmp/#{fetch(:application)} #{fetch(:nginx_config_path)}/#{fetch(:application)}.conf"
       end
 
-      if nginx_use_ssl
-        if nginx_upload_local_certificate
-          put File.read(nginx_ssl_certificate_local_path), "/tmp/#{nginx_ssl_certificate}"
-          put File.read(nginx_ssl_certificate_key_local_path), "/tmp/#{nginx_ssl_certificate_key}"
+      if fetch(:nginx_use_ssl)
+        if fetch(:nginx_upload_local_certificate)
+          upload! fetch(:nginx_ssl_certificate_local_path), "/tmp/#{fetch(:nginx_ssl_certificate)}"
+          upload! fetch(:nginx_ssl_certificate_key_local_path), "/tmp/#{fetch(:nginx_ssl_certificate_key)}"
           
-          execute "#{sudo} mv /tmp/#{nginx_ssl_certificate} /etc/ssl/certs/#{nginx_ssl_certificate}"
-          execute "#{sudo} mv /tmp/#{nginx_ssl_certificate_key} /etc/ssl/private/#{nginx_ssl_certificate_key}"
+          execute "#{sudo} mv /tmp/#{fetch(:nginx_ssl_certificate)} /etc/ssl/certs/#{fetch(:nginx_ssl_certificate)}"
+          execute "#{sudo} mv /tmp/#{fetch(:nginx_ssl_certificate_key)} /etc/ssl/private/#{fetch(:nginx_ssl_certificate_key)}"
         end
         
-        execute "#{sudo} chown root:root /etc/ssl/certs/#{nginx_ssl_certificate}"
-        execute "#{sudo} chown root:root /etc/ssl/private/#{nginx_ssl_certificate_key}"
+        execute "#{sudo} chown root:root /etc/ssl/certs/#{fetch(:nginx_ssl_certificate)}"
+        execute "#{sudo} chown root:root /etc/ssl/private/#{fetch(:nginx_ssl_certificate_key)}"
       end
     end
   end
