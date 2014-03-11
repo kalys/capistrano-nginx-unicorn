@@ -41,10 +41,10 @@ namespace :nginx do
     on roles(:web) do
       template("nginx_conf.erb", "/tmp/#{fetch(:application)}")
       if fetch(:nginx_config_path) == "/etc/nginx/sites-available"
-        execute "#{sudo} mv /tmp/#{fetch(:application)} /etc/nginx/sites-available/#{fetch(:application)}"
-        execute "#{sudo} ln -fs /etc/nginx/sites-available/#{fetch(:application)} /etc/nginx/sites-enabled/#{fetch(:application)}"
+        execute "#{fetch(:sudo)} mv /tmp/#{fetch(:application)} /etc/nginx/sites-available/#{fetch(:application)}"
+        execute "#{fetch(:sudo)} ln -fs /etc/nginx/sites-available/#{fetch(:application)} /etc/nginx/sites-enabled/#{fetch(:application)}"
       else
-        execute "#{sudo} mv /tmp/#{fetch(:application)} #{fetch(:nginx_config_path)}/#{fetch(:application)}.conf"
+        execute "#{fetch(:sudo)} mv /tmp/#{fetch(:application)} #{fetch(:nginx_config_path)}/#{fetch(:application)}.conf"
       end
 
       if fetch(:nginx_use_ssl)
@@ -52,12 +52,12 @@ namespace :nginx do
           upload! fetch(:nginx_ssl_certificate_local_path), "/tmp/#{fetch(:nginx_ssl_certificate)}"
           upload! fetch(:nginx_ssl_certificate_key_local_path), "/tmp/#{fetch(:nginx_ssl_certificate_key)}"
           
-          execute "#{sudo} mv /tmp/#{fetch(:nginx_ssl_certificate)} /etc/ssl/certs/#{fetch(:nginx_ssl_certificate)}"
-          execute "#{sudo} mv /tmp/#{fetch(:nginx_ssl_certificate_key)} /etc/ssl/private/#{fetch(:nginx_ssl_certificate_key)}"
+          execute "#{fetch(:sudo)} mv /tmp/#{fetch(:nginx_ssl_certificate)} /etc/ssl/certs/#{fetch(:nginx_ssl_certificate)}"
+          execute "#{fetch(:sudo)} mv /tmp/#{fetch(:nginx_ssl_certificate_key)} /etc/ssl/private/#{fetch(:nginx_ssl_certificate_key)}"
         end
         
-        execute "#{sudo} chown root:root /etc/ssl/certs/#{fetch(:nginx_ssl_certificate)}"
-        execute "#{sudo} chown root:root /etc/ssl/private/#{fetch(:nginx_ssl_certificate_key)}"
+        execute "#{fetch(:sudo)} chown root:root /etc/ssl/certs/#{fetch(:nginx_ssl_certificate)}"
+        execute "#{fetch(:sudo)} chown root:root /etc/ssl/private/#{fetch(:nginx_ssl_certificate_key)}"
       end
     end
   end
@@ -65,7 +65,7 @@ namespace :nginx do
   desc "Reload nginx configuration"
   task :reload do
     on roles(:web) do
-      execute "#{sudo} /etc/init.d/nginx reload"
+      execute "#{fetch(:sudo)} /etc/init.d/nginx reload"
     end
   end
 end
@@ -78,8 +78,8 @@ namespace :unicorn do
       template "unicorn.rb.erb", fetch(:unicorn_config)
       template "unicorn_init.erb", "/tmp/unicorn_init"
       execute "chmod +x /tmp/unicorn_init"
-      execute "#{sudo} mv /tmp/unicorn_init /etc/init.d/unicorn_#{fetch(:application)}"
-      execute "#{sudo} update-rc.d -f unicorn_#{fetch(:application)} defaults"
+      execute "#{fetch(:sudo)} mv /tmp/unicorn_init /etc/init.d/unicorn_#{fetch(:application)}"
+      execute "#{fetch(:sudo)} update-rc.d -f unicorn_#{fetch(:application)} defaults"
     end
   end
 
@@ -100,8 +100,8 @@ desc "Setup logs rotation for nginx and unicorn"
 task :logrotate do
   on roles(:web, :app) do
     template("logrotate.erb", "/tmp/#{fetch(:application)}_logrotate")
-    execute "#{sudo} mv /tmp/#{fetch(:application)}_logrotate /etc/logrotate.d/#{fetch(:application)}"
-    execute "#{sudo} chown root:root /etc/logrotate.d/#{fetch(:application)}"
+    execute "#{fetch(:sudo)} mv /tmp/#{fetch(:application)}_logrotate /etc/logrotate.d/#{fetch(:application)}"
+    execute "#{fetch(:sudo)} chown root:root /etc/logrotate.d/#{fetch(:application)}"
   end
 end
 
