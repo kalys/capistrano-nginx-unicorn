@@ -89,6 +89,8 @@ namespace :unicorn do
     end
   end
 
+  # ensure that unicorn is setup before attempting to restart...
+  before :restart, "unicorn:setup"
 end
 
 desc "Setup logs rotation for nginx and unicorn"
