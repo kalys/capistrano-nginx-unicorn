@@ -6,11 +6,11 @@ require 'capistrano/nginx_unicorn/version'
 Gem::Specification.new do |gem|
   gem.name          = "capistrano-nginx-unicorn"
   gem.version       = Capistrano::NginxUnicorn::VERSION
-  gem.authors       = ["Ivan Tkalin"]
-  gem.email         = ["itkalin@gmail.com"]
+  gem.authors       = ["Ivan Tkalin", "Kalys Osmonov"]
+  gem.email         = ["kalys@osmonov.com"]
   gem.description   = %q{Capistrano tasks for configuration and management nginx+unicorn combo for zero downtime deployments of Rails applications. Configs can be copied to the application using generators and easily customized.}
   gem.summary       = %q{Create and manage nginx+unicorn configs from capistrano}
-  gem.homepage      = "https://github.com/ivalkeen/capistrano-nginx-unicorn"
+  gem.homepage      = "https://github.com/kalys/capistrano-nginx-unicorn"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
