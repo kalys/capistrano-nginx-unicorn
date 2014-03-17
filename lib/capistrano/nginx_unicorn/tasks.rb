@@ -1,6 +1,5 @@
 require 'capistrano'
 require 'erb'
-require 'byebug'
 
 def set_default(name, value)
   set(name, value) if fetch(name).nil?
@@ -51,11 +50,11 @@ namespace :nginx do
         if fetch(:nginx_upload_local_certificate)
           upload! fetch(:nginx_ssl_certificate_local_path), "/tmp/#{fetch(:nginx_ssl_certificate)}"
           upload! fetch(:nginx_ssl_certificate_key_local_path), "/tmp/#{fetch(:nginx_ssl_certificate_key)}"
-          
+
           execute "#{fetch(:sudo)} mv /tmp/#{fetch(:nginx_ssl_certificate)} /etc/ssl/certs/#{fetch(:nginx_ssl_certificate)}"
           execute "#{fetch(:sudo)} mv /tmp/#{fetch(:nginx_ssl_certificate_key)} /etc/ssl/private/#{fetch(:nginx_ssl_certificate_key)}"
         end
-        
+
         execute "#{fetch(:sudo)} chown root:root /etc/ssl/certs/#{fetch(:nginx_ssl_certificate)}"
         execute "#{fetch(:sudo)} chown root:root /etc/ssl/private/#{fetch(:nginx_ssl_certificate_key)}"
       end
