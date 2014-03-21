@@ -8,7 +8,7 @@ namespace :load do
     set :unicorn_pid, -> { shared_path.join("pids/unicorn.pid") }
     set :unicorn_config, -> { shared_path.join("config/unicorn.rb") }
     set :unicorn_log, -> { shared_path.join("log/unicorn.log") }
-    set :unicorn_user, fetch(:user)
+    set :unicorn_user, -> { fetch(:user) }
     set :unicorn_workers, 2
   end
 end
