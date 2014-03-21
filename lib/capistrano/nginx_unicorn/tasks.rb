@@ -1,9 +1,8 @@
 require 'capistrano'
 require 'erb'
 
-def set_default(name, value)
-  set(name, value) if fetch(name).nil?
-end
+load File.expand_path("../tasks/nginx.rake", __FILE__)
+load File.expand_path("../tasks/unicorn.rake", __FILE__)
 
 def template(template_name, target)
   config_file = "#{fetch(:templates_path)}/#{template_name}"
@@ -15,88 +14,6 @@ def template(template_name, target)
   upload! config_stream, target
 end
 
-set_default(:templates_path, "config/deploy/templates")
-
-set_default(:nginx_server_name, proc { ask(:nginx_server_name, "Nginx server name: ") })
-set_default(:nginx_use_ssl, false)
-set_default(:nginx_pid, "/run/nginx.pid")
-set_default(:nginx_ssl_certificate, "#{fetch(:nginx_server_name)}.crt")
-set_default(:nginx_ssl_certificate_key, "#{fetch(:nginx_server_name)}.key")
-set_default(:nginx_upload_local_certificate, true)
-set_default(:nginx_ssl_certificate_local_path, proc { ask(:nginx_ssl_certificate_local_path, "Local path to ssl certificate: ") })
-set_default(:nginx_ssl_certificate_key_local_path, proc { ask(:nginx_ssl_certificate_key_local_path, "Local path to ssl certificate key: ") })
-
-set_default(:unicorn_pid, shared_path.join("pids/unicorn.pid"))
-set_default(:unicorn_config, shared_path.join("config/unicorn.rb"))
-set_default(:unicorn_log, shared_path.join("log/unicorn.log"))
-set_default(:unicorn_user, fetch(:user))
-set_default(:unicorn_workers, proc { ask(:unicorn_workers, "Number of unicorn workers: ") })
-
-set_default(:nginx_config_path, "/etc/nginx/sites-available")
-
-namespace :nginx do
-  desc "Setup nginx configuration for this application"
-  task :setup do
-    on roles(:web) do
-      template("nginx_conf.erb", "/tmp/#{fetch(:application)}")
-      if fetch(:nginx_config_path) == "/etc/nginx/sites-available"
-        execute "#{fetch(:sudo)} mv /tmp/#{fetch(:application)} /etc/nginx/sites-available/#{fetch(:application)}"
-        execute "#{fetch(:sudo)} ln -fs /etc/nginx/sites-available/#{fetch(:application)} /etc/nginx/sites-enabled/#{fetch(:application)}"
-      else
-        execute "#{fetch(:sudo)} mv /tmp/#{fetch(:application)} #{fetch(:nginx_config_path)}/#{fetch(:application)}.conf"
-      end
-
-      if fetch(:nginx_use_ssl)
-        if fetch(:nginx_upload_local_certificate)
-          upload! fetch(:nginx_ssl_certificate_local_path), "/tmp/#{fetch(:nginx_ssl_certificate)}"
-          upload! fetch(:nginx_ssl_certificate_key_local_path), "/tmp/#{fetch(:nginx_ssl_certificate_key)}"
-
-          execute "#{fetch(:sudo)} mv /tmp/#{fetch(:nginx_ssl_certificate)} /etc/ssl/certs/#{fetch(:nginx_ssl_certificate)}"
-          execute "#{fetch(:sudo)} mv /tmp/#{fetch(:nginx_ssl_certificate_key)} /etc/ssl/private/#{fetch(:nginx_ssl_certificate_key)}"
-        end
-
-        execute "#{fetch(:sudo)} chown root:root /etc/ssl/certs/#{fetch(:nginx_ssl_certificate)}"
-        execute "#{fetch(:sudo)} chown root:root /etc/ssl/private/#{fetch(:nginx_ssl_certificate_key)}"
-      end
-    end
-  end
-
-  desc "Reload nginx configuration"
-  task :reload do
-    on roles(:web) do
-      execute "#{fetch(:sudo)} /etc/init.d/nginx reload"
-    end
-  end
-end
-
-namespace :unicorn do
-  desc "Setup Unicorn initializer and app configuration"
-  task :setup do
-    on roles(:app) do
-      execute :mkdir, "-p", shared_path.join("config")
-      execute :mkdir, "-p", shared_path.join("log")
-      execute :mkdir, "-p", shared_path.join("pids")
-      template "unicorn.rb.erb", fetch(:unicorn_config)
-      template "unicorn_init.erb", "/tmp/unicorn_init"
-      execute "chmod +x /tmp/unicorn_init"
-      execute "#{fetch(:sudo)} mv /tmp/unicorn_init /etc/init.d/unicorn_#{fetch(:application)}"
-      execute "#{fetch(:sudo)} update-rc.d -f unicorn_#{fetch(:application)} defaults"
-    end
-  end
-
-  %w[start stop restart].each do |command|
-    desc "#{command} unicorn"
-    task command do
-      on roles(:app) do
-        execute "service unicorn_#{fetch(:application)} #{command}"
-      end
-    end
-  end
-
-  # ensure that unicorn is setup before attempting to restart...
-  before :restart, "unicorn:setup"
-end
-
 desc "Setup logs rotation for nginx and unicorn"
 task :logrotate do
   on roles(:web, :app) do
@@ -106,15 +23,44 @@ task :logrotate do
   end
 end
 
-namespace :deploy do
+namespace :nginx_unicorn do
+  desc "Setup nginx and unicorn"
+  task :setup do
+  end
 
-  after :finishing, "nginx:setup"
-  after :finishing, "nginx:reload"
-  after :finishing, "unicorn:setup"
-  after :finishing, "unicorn:start"
-  after :restart, "unicorn:restart"
-  after :finishing, "logrotate"
+  task :defaults do
+    def set_default(name, value)
+      set(name, value) if fetch(name).nil?
+    end
 
+    set_default(:templates_path, "config/deploy/templates")
+    set_default(:sudo, "sudo")
+
+    set_default(:nginx_server_name, "#{fetch(:application)}.local")
+    set_default(:nginx_use_ssl, false)
+    set_default(:nginx_pid, "/run/nginx.pid")
+    set_default(:nginx_ssl_certificate, "#{fetch(:nginx_server_name)}.crt")
+    set_default(:nginx_ssl_certificate_key, "#{fetch(:nginx_server_name)}.key")
+    set_default(:nginx_upload_local_certificate, true)
+    set_default(:nginx_ssl_certificate_local_path, proc { ask(:nginx_ssl_certificate_local_path, "Local path to ssl certificate: ") })
+    set_default(:nginx_ssl_certificate_key_local_path, proc { ask(:nginx_ssl_certificate_key_local_path, "Local path to ssl certificate key: ") })
+
+    set_default(:unicorn_pid, shared_path.join("pids/unicorn.pid"))
+    set_default(:unicorn_config, "/etc/unicorn.rb")
+    set_default(:unicorn_log, shared_path.join("log/unicorn.log"))
+    set_default(:unicorn_user, fetch(:user))
+    set_default(:unicorn_workers, 2)
+
+    set_default(:nginx_config_path, "/etc/nginx/sites-available")
+  end
+
+  before :setup, 'nginx_unicorn:defaults'
+  before :setup, 'nginx:setup'
+  before :setup, 'unicorn:setup'
 end
 
-
+namespace :deploy do
+  after :finishing, "nginx:reload"
+  after :finishing, "logrotate"
+  after :restart, "unicorn:restart"
+end
