@@ -43,6 +43,6 @@ end
 
 namespace :deploy do
   after :finishing, "unicorn:setup"
-  after :finishing, "unicorn:start"
+  after :finishing, "unicorn:restart"
   after :restart, "unicorn:restart"
 end
