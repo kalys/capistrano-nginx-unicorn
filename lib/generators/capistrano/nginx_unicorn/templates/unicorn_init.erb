@@ -15,7 +15,7 @@ TIMEOUT=${TIMEOUT-60}
 APP_ROOT=<%= current_path %>
 PID=<%= fetch(:unicorn_pid) %>
 
-CMD="cd <%= current_path %>; bundle exec unicorn -D -c <%= fetch(:unicorn_config) %> -E <%= fetch(:rails_env) %>"
+CMD="<%= current_path %>/bin/unicorn -D -c <%= fetch(:unicorn_config) %> -E <%= fetch(:rails_env) %>"
 
 AS_USER=<%= fetch(:unicorn_user) %>
 set -u

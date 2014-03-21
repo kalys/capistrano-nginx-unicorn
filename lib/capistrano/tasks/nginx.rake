@@ -1,0 +1,59 @@
+require 'capistrano/nginx_unicorn/helpers'
+
+include Capistrano::NginxUnicorn::Helpers
+
+namespace :load do
+  task :defaults do
+    set :templates_path, "config/deploy/templates"
+    set :nginx_server_name, -> { ask(:nginx_server_name, "Nginx server name: ") }
+    set :nginx_use_ssl, false
+    set :nginx_pid, "/run/nginx.pid"
+    set :nginx_ssl_certificate, -> { "#{fetch(:nginx_server_name)}.crt" }
+    set :nginx_ssl_certificate_key, -> { "#{fetch(:nginx_server_name)}.key" }
+    set :nginx_upload_local_certificate, true
+    set :nginx_ssl_certificate_local_path, -> { ask(:nginx_ssl_certificate_local_path, "Local path to ssl certificate: ") }
+    set :nginx_ssl_certificate_key_local_path, -> { ask(:nginx_ssl_certificate_key_local_path, "Local path to ssl certificate key: ") }
+    set :nginx_config_path, "/etc/nginx/sites-available"
+  end
+end
+
+namespace :nginx do
+  desc "Setup nginx configuration for this application"
+  task :setup do
+    on roles(:web) do
+      execute :mkdir, "-p", shared_path.join("log")
+      template("nginx_conf.erb", "/tmp/nginx_#{fetch(:application)}")
+      if fetch(:nginx_config_path) == "/etc/nginx/sites-available"
+        sudo :mv, "/tmp/nginx_#{fetch(:application)} /etc/nginx/sites-available/#{fetch(:application)}"
+        sudo :ln, "-fs", "/etc/nginx/sites-available/#{fetch(:application)} /etc/nginx/sites-enabled/#{fetch(:application)}"
+      else
+        sudo :mv, "/tmp/#{fetch(:application)} #{fetch(:nginx_config_path)}/#{fetch(:application)}.conf"
+      end
+
+      if fetch(:nginx_use_ssl)
+        if fetch(:nginx_upload_local_certificate)
+          upload! fetch(:nginx_ssl_certificate_local_path), "/tmp/#{fetch(:nginx_ssl_certificate)}"
+          upload! fetch(:nginx_ssl_certificate_key_local_path), "/tmp/#{fetch(:nginx_ssl_certificate_key)}"
+
+          sudo :mv, "/tmp/#{fetch(:nginx_ssl_certificate)} /etc/ssl/certs/#{fetch(:nginx_ssl_certificate)}"
+          sudo :mv, "/tmp/#{fetch(:nginx_ssl_certificate_key)} /etc/ssl/private/#{fetch(:nginx_ssl_certificate_key)}"
+        end
+
+        sudo :chown, "root:root /etc/ssl/certs/#{fetch(:nginx_ssl_certificate)}"
+        sudo :chown, "root:root /etc/ssl/private/#{fetch(:nginx_ssl_certificate_key)}"
+      end
+    end
+  end
+
+  desc "Reload nginx configuration"
+  task :reload do
+    on roles(:web) do
+      sudo "/etc/init.d/nginx reload"
+    end
+  end
+end
+
+namespace :deploy do
+  after :finishing, "nginx:setup"
+  after :finishing, "nginx:reload"
+end
