@@ -4,6 +4,10 @@ module Capistrano
   module NginxUnicorn
     module Helpers
 
+      def bundle_unicorn(*args)
+        SSHKit::Command.new(:bundle, :exec, :unicorn, args).to_command
+      end
+
       def template(template_name, target)
         config_file = "#{fetch(:templates_path)}/#{template_name}"
         # if no customized file, proceed with default
