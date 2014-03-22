@@ -1,4 +1,4 @@
-namespace :logrotate
+namespace :logrotate do
   desc "Setup logs rotation for nginx and unicorn"
   task :setup do
     on roles(:web, :app) do
