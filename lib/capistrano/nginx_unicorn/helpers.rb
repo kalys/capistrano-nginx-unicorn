@@ -18,6 +18,10 @@ module Capistrano
         upload! config_stream, target
       end
 
+      def file_exists?(path)
+        test "[ -e #{path} ]"
+      end
+
     end
   end
 end
