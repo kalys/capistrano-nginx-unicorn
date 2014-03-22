@@ -19,7 +19,7 @@ namespace :load do
 end
 
 namespace :nginx do
-  desc "Setup nginx configuration for this application"
+  desc "Setup nginx configuration"
   task :setup do
     on roles(:web) do
       next if file_exists? "#{fetch(:nginx_config_path)}/#{fetch(:nginx_config_name)}"
@@ -32,7 +32,12 @@ namespace :nginx do
       else
         sudo :mv, "/tmp/#{fetch(:nginx_config_name)} #{fetch(:nginx_config_path)}/#{fetch(:nginx_config_name)}"
       end
+    end
+  end
 
+  desc "Setup nginx ssl certs"
+  task :setup_ssl do
+    on roles(:web) do
       if fetch(:nginx_use_ssl)
         if fetch(:nginx_upload_local_certificate)
           upload! fetch(:nginx_ssl_certificate_local_path), "/tmp/#{fetch(:nginx_ssl_certificate)}"
@@ -57,6 +62,7 @@ namespace :nginx do
 end
 
 namespace :deploy do
-  after :finishing, "nginx:setup"
-  after :finishing, "nginx:reload"
+  after :started, "nginx:setup"
+  after :started, "nginx:setup_ssl"
+  after :publishing, "nginx:reload"
 end

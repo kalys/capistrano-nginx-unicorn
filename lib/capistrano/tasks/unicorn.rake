@@ -50,8 +50,7 @@ namespace :unicorn do
 end
 
 namespace :deploy do
-  after :finishing, "unicorn:setup_initializer"
-  after :finishing, "unicorn:setup_app_config"
-  after :finishing, "unicorn:restart"
-  after :restart, "unicorn:restart"
+  after :updated, "unicorn:setup_initializer"
+  after :updated, "unicorn:setup_app_config"
+  after :publishing, "unicorn:restart"
 end
