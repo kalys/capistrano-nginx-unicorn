@@ -36,9 +36,6 @@ namespace :unicorn do
       end
     end
   end
-
-  # ensure that unicorn is setup before attempting to restart...
-  before :restart, "unicorn:setup"
 end
 
 namespace :deploy do
