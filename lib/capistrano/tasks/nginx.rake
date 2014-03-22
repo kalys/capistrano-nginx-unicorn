@@ -6,6 +6,7 @@ namespace :load do
   task :defaults do
     set :templates_path, "config/deploy/templates"
     set :nginx_server_name, -> { ask(:nginx_server_name, "Nginx server name: ") }
+    set :nginx_config_name, -> { "#{fetch(:application)}_#{fetch(:stage)}" }
     set :nginx_use_ssl, false
     set :nginx_pid, "/run/nginx.pid"
     set :nginx_ssl_certificate, -> { "#{fetch(:nginx_server_name)}.crt" }
@@ -22,12 +23,12 @@ namespace :nginx do
   task :setup do
     on roles(:web) do
       execute :mkdir, "-p", shared_path.join("log")
-      template("nginx_conf.erb", "/tmp/nginx_#{fetch(:application)}")
+      template("nginx_conf.erb", "/tmp/nginx_#{fetch(:nginx_config_name)}")
       if fetch(:nginx_config_path) == "/etc/nginx/sites-available"
-        sudo :mv, "/tmp/nginx_#{fetch(:application)} /etc/nginx/sites-available/#{fetch(:application)}"
-        sudo :ln, "-fs", "/etc/nginx/sites-available/#{fetch(:application)} /etc/nginx/sites-enabled/#{fetch(:application)}"
+        sudo :mv, "/tmp/nginx_#{fetch(:nginx_config_name)} /etc/nginx/sites-available/#{fetch(:nginx_config_name)}"
+        sudo :ln, "-fs", "/etc/nginx/sites-available/#{fetch(:nginx_config_name)} /etc/nginx/sites-enabled/#{fetch(:nginx_config_name)}"
       else
-        sudo :mv, "/tmp/#{fetch(:application)} #{fetch(:nginx_config_path)}/#{fetch(:application)}.conf"
+        sudo :mv, "/tmp/#{fetch(:nginx_config_name)} #{fetch(:nginx_config_path)}/#{fetch(:nginx_config_name)}.conf"
       end
 
       if fetch(:nginx_use_ssl)

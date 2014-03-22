@@ -4,6 +4,7 @@ include Capistrano::NginxUnicorn::Helpers
 
 namespace :load do
   task :defaults do
+    set :unicorn_service_name, -> { "unicorn_#{fetch(:application)}_#{fetch(:stage)}" }
     set :templates_path, "config/deploy/templates"
     set :unicorn_pid, -> { shared_path.join("pids/unicorn.pid") }
     set :unicorn_config, -> { shared_path.join("config/unicorn.rb") }
@@ -23,8 +24,8 @@ namespace :unicorn do
       template "unicorn.rb.erb", fetch(:unicorn_config)
       template "unicorn_init.erb", "/tmp/unicorn_init"
       execute :chmod, "+x", "/tmp/unicorn_init"
-      sudo :mv, "/tmp/unicorn_init /etc/init.d/unicorn_#{fetch(:application)}"
-      sudo "update-rc.d -f unicorn_#{fetch(:application)} defaults"
+      sudo :mv, "/tmp/unicorn_init /etc/init.d/#{fetch(:unicorn_service_name)}"
+      sudo "update-rc.d -f #{fetch(:unicorn_service_name)} defaults"
     end
   end
 
@@ -32,7 +33,7 @@ namespace :unicorn do
     desc "#{command} unicorn"
     task command do
       on roles(:app) do
-        execute "service unicorn_#{fetch(:application)} #{command}"
+        execute "service #{fetch(:unicorn_service_name)} #{command}"
       end
     end
   end
