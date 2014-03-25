@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ### BEGIN INIT INFO
 # Provides: unicorn
 # Required-Start: $remote_fs $syslog
@@ -16,7 +16,7 @@ APP_ROOT=<%= current_path %>
 PID=<%= fetch(:unicorn_pid) %>
 
 # no rvm and no rbenv
-CMD="cd <%= current_path %>; bundle exec unicorn -D -c <%= fetch(:unicorn_config) %> -E <%= fetch(:rails_env) %>"
+CMD="cd $APP_ROOT; bundle exec unicorn -D -c <%= fetch(:unicorn_config) %> -E <%= fetch(:rails_env) %>"
 
 # rvm
 #CMD="cd <%= current_path %>; <%= fetch(:rvm_path) %>/bin/rvm do bundle exec unicorn -D -c <%= fetch(:unicorn_config) %> -E <%= fetch(:rails_env) %>"
