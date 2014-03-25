@@ -152,9 +152,8 @@ For example, of you site name is `example.com` and you want to use 4 unicorn wor
 your `deploy.rb` will look like this:
 
 ```ruby
-set :server_name, "example.com"
+set :nginx_server_name, "example.com"
 set :unicorn_workers, 4
-require 'capistrano-nginx-unicorn'
 ```
 
 ### Template Customization
