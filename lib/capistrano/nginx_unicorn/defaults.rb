@@ -11,7 +11,6 @@ set :nginx_ssl_certificate_key_local_path, -> { ask(:nginx_ssl_certificate_key_l
 set :nginx_config_path, "/etc/nginx/sites-available"
 
 set :unicorn_service_name, -> { "unicorn_#{fetch(:application)}_#{fetch(:stage)}" }
-set :templates_path, "config/deploy/templates"
 set :unicorn_pid, -> { shared_path.join("pids/unicorn.pid") }
 set :unicorn_config, -> { shared_path.join("config/unicorn.rb") }
 set :unicorn_log, -> { shared_path.join("log/unicorn.log") }
