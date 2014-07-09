@@ -9,7 +9,11 @@ namespace :unicorn do
       template "unicorn_init.erb", "/tmp/unicorn_init"
       execute :chmod, "+x", "/tmp/unicorn_init"
       sudo :mv, "/tmp/unicorn_init /etc/init.d/#{fetch(:unicorn_service_name)}"
-      sudo "update-rc.d -f #{fetch(:unicorn_service_name)} defaults"
+      if which('update-rc.d').nil?
+        sudo "chkconfig #{fetch(:unicorn_service_name)} on"
+      else
+        sudo "update-rc.d -f #{fetch(:unicorn_service_name)} defaults"
+      end
     end
   end
 
@@ -31,6 +35,17 @@ namespace :unicorn do
       end
     end
   end
+
+  def which(cmd)
+  exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
+  ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
+    exts.each { |ext|
+      exe = File.join(path, "#{cmd}#{ext}")
+      return exe if File.executable? exe
+    }
+  end
+  return nil
+end
 end
 
 namespace :deploy do
