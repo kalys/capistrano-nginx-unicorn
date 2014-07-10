@@ -118,8 +118,8 @@ set :nginx_ssl_certificate_key, "#{nginx_server_name}.key"
 set :nginx_config_path, "/etc/nginx/sites-available"
 
 # path, where unicorn pid file will be stored
-# default value: `"#{current_path}/tmp/pids/unicorn.pid"`
-set :unicorn_pid, "#{current_path}/tmp/pids/unicorn.pid"
+# default value: `"#{shared_path}/pids/unicorn.pid"`
+set :unicorn_pid, "#{shared_path}/pids/unicorn.pid"
 
 # path, where unicorn config file will be stored
 # default value: `"#{shared_path}/config/unicorn.rb"`
