@@ -17,7 +17,7 @@ Also, for full customization, all configs can be copied to the application using
 
 Add this line to your application's Gemfile:
 
-    gem 'capistrano-nginx-unicorn', require: false, group: :development
+    gem 'capistrano-nginx-unicorn', group: :development
 
 And then execute:
 
@@ -29,16 +29,9 @@ Or install it yourself as:
 
 ## Usage
 
-Add this line to your `deploy.rb`
+Add this line to your `Capfile`
 
-    require 'capistrano-nginx-unicorn'
-
-Note, that following capistrano variables should be defined:
-
-    application
-    current_path
-    shared_path
-    user
+    require 'capistrano/nginx_unicorn'
 
 You can check that new tasks are available (`cap -T`):
 
@@ -47,13 +40,19 @@ for nginx:
     # add and enable application to nginx
     cap nginx:setup
 
+    # upload ssl certificates
+    cap nginx:setup_ssl
+
     # reload nginx configuration
     cap nginx:reload
 
 and for unicorn:
 
-    # create unicorn configuration and init script
-    cap unicorn:setup
+    # create unicorn init script
+    cap unicorn:setup_initializer
+
+    # create unicorn configuration file
+    cap unicorn:setup_app_config
 
     # start unicorn
     cap unicorn:start
@@ -69,20 +68,10 @@ and for unicorn:
 and shared:
 
     # create logrotate record to rotate application logs
-    cap logrotate
+    cap logrotate:setup
 
-There is no need to execute any of these tasks manually.
-They will be called automatically on different deploy stages:
-
-* `nginx:setup`, `nginx:reload`, `unicorn:setup` and `logrotate` are hooked to `deploy:setup`
-* `unicorn:restart` is hooked to `deploy:restart`
-
-This means that if you run `cap deploy:setup`,
-nginx and unicorn will be automatically configured.
-And after each deploy, unicorn will be automatically reloaded.
-
-However, if you changed variables or customized templates,
-you can run any of these tasks to update configuration.
+### Hooks
+`nginx:reload`, `unicorn:restart` are hooked to `deploy:publishing`
 
 ## Customization
 
@@ -91,39 +80,19 @@ you can run any of these tasks to update configuration.
 You can customize nginx and unicorn configs using capistrano variables:
 
 
-```ruby
+```
 # path to customized templates (see below for details)
 # default value: "config/deploy/templates"
 set :templates_path, "config/deploy/templates"
 
-# server name for nginx, default value: no (will be prompted if not set)
+# server name for nginx, default value: "localhost <application>.local"
 # set this to your site name as it is visible from outside
 # this will allow 1 nginx to serve several sites with different `server_name`
 set :nginx_server_name, "example.com"
 
-# path, where unicorn pid file will be stored
-# default value: `"#{current_path}/tmp/pids/unicorn.pid"`
-set :unicorn_pid, "#{current_path}/tmp/pids/unicorn.pid"
-
 # path, where nginx pid file will be stored (used in logrotate recipe)
 # default value: `"/run/nginx.pid"`
 set :nginx_pid, "/run/nginx.pid"
-
-# path, where unicorn config file will be stored
-# default value: `"#{shared_path}/config/unicorn.rb"`
-set :unicorn_config, "#{shared_path}/config/unicorn.rb"
-
-# path, where unicorn log file will be stored
-# default value: `"#{shared_path}/config/unicorn.rb"`
-set :unicorn_log, "#{shared_path}/config/unicorn.rb"
-
-# user name to run unicorn
-# default value: `user` (user varibale defined in your `deploy.rb`)
-set :unicorn_user, "user"
-
-# number of unicorn workers
-# default value: no (will be prompted if not set)
-set :unicorn_workers, 4
 
 # if set, nginx will be configured to 443 port and port 80 will be auto rewritten to 443
 # also, on `nginx:setup`, paths to ssl certificate and key will be configured
@@ -143,6 +112,31 @@ set :nginx_ssl_certificate, "#{nginx_server_name}.crt"
 # default value: `nginx_server_name + ".key"`
 set :nginx_ssl_certificate_key, "#{nginx_server_name}.key"
 
+# nginx config file location
+# centos users can set `/etc/nginx/conf.d`
+# default value: `/etc/nginx/sites-available`
+set :nginx_config_path, "/etc/nginx/sites-available"
+
+# path, where unicorn pid file will be stored
+# default value: `"#{current_path}/tmp/pids/unicorn.pid"`
+set :unicorn_pid, "#{current_path}/tmp/pids/unicorn.pid"
+
+# path, where unicorn config file will be stored
+# default value: `"#{shared_path}/config/unicorn.rb"`
+set :unicorn_config, "#{shared_path}/config/unicorn.rb"
+
+# path, where unicorn log file will be stored
+# default value: `"#{shared_path}/config/unicorn.rb"`
+set :unicorn_log, "#{shared_path}/config/unicorn.rb"
+
+# user name to run unicorn
+# default value: `user` (user varibale defined in your `deploy.rb`)
+set :unicorn_user, "user"
+
+# number of unicorn workers
+# default value: 2
+set :unicorn_workers, 2
+
 # local path to file with certificate, only makes sense if `nginx_use_ssl` is set
 # this file will be copied to remote server
 # default value: none (will be prompted if not set)
@@ -154,13 +148,12 @@ set :nginx_ssl_certificate_local_path, "/home/ivalkeen/ssl/myssl.cert"
 set :nginx_ssl_certificate_key_local_path, "/home/ivalkeen/ssl/myssl.key"
 ```
 
-For example, of you site name is `example.com` and you want to use 8 unicorn workers,
+For example, of you site name is `example.com` and you want to use 4 unicorn workers,
 your `deploy.rb` will look like this:
 
 ```ruby
-set :server_name, "example.com"
+set :nginx_server_name, "example.com"
 set :unicorn_workers, 4
-require 'capistrano-nginx-unicorn'
 ```
 
 ### Template Customization
