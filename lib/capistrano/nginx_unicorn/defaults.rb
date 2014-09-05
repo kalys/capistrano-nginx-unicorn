@@ -11,7 +11,7 @@ set :nginx_ssl_certificate_key_local_path, -> { ask(:nginx_ssl_certificate_key_l
 set :nginx_config_path, "/etc/nginx/sites-available"
 set :nginx_client_body_buffer_size, "10K"
 set :nginx_client_header_buffer_size, "1K"
-set :nginx_max_body_size, "4G"
+set :nginx_client_max_body_size, "4G"
 set :nginx_large_client_header_buffers, "2 1K"
 set :nginx_client_body_timeout, "12"
 set :nginx_client_header_timeout, "12"

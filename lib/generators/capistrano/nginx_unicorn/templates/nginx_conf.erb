@@ -21,7 +21,7 @@ server {
 
   client_body_buffer_size <%= fetch(:nginx_client_body_buffer_size) %>;
   client_header_buffer_size <%= fetch(:nginx_client_header_buffer_size) %>;
-  client_max_body_size <%= fetch(:nginx_max_body_size) %>;
+  client_max_body_size <%= fetch(:nginx_client_max_body_size) %>;
   large_client_header_buffers <%= fetch(:nginx_large_client_header_buffers) %>;
 
   client_body_timeout <%= fetch(:nginx_client_body_timeout) %>;
