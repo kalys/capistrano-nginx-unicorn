@@ -19,8 +19,21 @@ server {
   listen 80;
 <% end %>
 
-  client_max_body_size 4G;
-  keepalive_timeout 10;
+  client_body_buffer_size <%= fetch(:nginx_client_body_buffer_size) %>;
+  client_header_buffer_size <%= fetch(:nginx_client_header_buffer_size) %>;
+  client_max_body_size <%= fetch(:nginx_client_max_body_size) %>;
+  large_client_header_buffers <%= fetch(:nginx_large_client_header_buffers) %>;
+
+  client_body_timeout <%= fetch(:nginx_client_body_timeout) %>;
+  client_header_timeout <%= fetch(:nginx_client_header_timeout) %>;
+  keepalive_timeout <%= fetch(:nginx_keepalive_timeout) %>;
+  send_timeout <%= fetch(:nginx_send_timeout) %>;
+
+  gzip <%= fetch(:nginx_gzip) %>;
+  gzip_comp_level <%= fetch(:nginx_gzip_comp_level) %>;
+  gzip_min_length <%= fetch(:nginx_gzip_min_length) %>;
+  gzip_proxied <%= fetch(:nginx_gzip_proxied) %>;
+  gzip_types <%= fetch(:nginx_gzip_types) %>;
 
   error_page 500 502 504 /500.html;
   error_page 503 @503;
