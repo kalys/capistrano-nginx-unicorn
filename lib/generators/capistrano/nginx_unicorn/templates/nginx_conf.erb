@@ -32,8 +32,8 @@ server {
   gzip <%= fetch(:nginx_gzip) %>;
   gzip_comp_level <%= fetch(:nginx_gzip_comp_level) %>;
   gzip_min_length <%= fetch(:nginx_gzip_min_length) %>;
-  gzip_proxied <%= fetch(:nginx_proxied) %>;
-  gzip_types <%= fetch(:nginx_types) %>;
+  gzip_proxied <%= fetch(:nginx_gzip_proxied) %>;
+  gzip_types <%= fetch(:nginx_gzip_types) %>;
 
   error_page 500 502 504 /500.html;
   error_page 503 @503;
