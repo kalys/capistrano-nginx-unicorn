@@ -156,6 +156,27 @@ set :nginx_server_name, "example.com"
 set :unicorn_workers, 4
 ```
 
+### Performance Tuning
+
+The following variables are also able to be overridden in order to
+customize Nginx behavior.  Below are the default values:
+
+```ruby
+set :nginx_client_body_buffer_size, "10K"
+set :nginx_client_header_buffer_size, "1K"
+set :nginx_client_max_body_size, "4G"
+set :nginx_large_client_header_buffers, "2 1K"
+set :nginx_client_body_timeout, "12"
+set :nginx_client_header_timeout, "12"
+set :nginx_keepalive_timeout, "10"
+set :nginx_send_timeout, "10"
+set :nginx_gzip, "on"
+set :nginx_gzip_comp_level, "2"
+set :nginx_gzip_min_length, "1000"
+set :nginx_gzip_proxied, "expired no-cache no-store private auth"
+set :nginx_gzip_types, "text/plain application/x-javascript text/xml text/css application/xml"
+```
+
 ### Template Customization
 
 If you want to change default templates, you can generate them using `rails generator`
