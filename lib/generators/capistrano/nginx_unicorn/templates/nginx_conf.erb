@@ -11,12 +11,12 @@ server {
 
 server {
 <% if fetch(:nginx_use_ssl) %>
-  listen 443;
+  listen <%= fetch(:nginx_https_port) %>;
   ssl on;
   ssl_certificate /etc/ssl/certs/<%= fetch(:nginx_ssl_certificate) %>;
   ssl_certificate_key /etc/ssl/private/<%= fetch(:nginx_ssl_certificate_key) %>;
 <% else %>
-  listen 80;
+  listen <%= fetch(:nginx_http_port) %>;
 <% end %>
 
   client_max_body_size 4G;
