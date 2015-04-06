@@ -95,9 +95,10 @@ set :nginx_server_name, "example.com"
 set :nginx_pid, "/run/nginx.pid"
 
 # if set, nginx will be configured to 443 port and port 80 will be auto rewritten to 443
+# set `nginx_http_port` and `nginx_https_port` if you need to change these ports
 # also, on `nginx:setup`, paths to ssl certificate and key will be configured
 # and certificate file and key will be copied to `/etc/ssl/certs` and `/etc/ssl/private/` directories
-# default value: false
+# default value: false.
 set :nginx_use_ssl, false
 
 # if set, it will ask to upload certificates from a local path. Otherwise, it will expect
@@ -116,6 +117,12 @@ set :nginx_ssl_certificate_key, "#{nginx_server_name}.key"
 # centos users can set `/etc/nginx/conf.d`
 # default value: `/etc/nginx/sites-available`
 set :nginx_config_path, "/etc/nginx/sites-available"
+
+# nginx http listen port
+set :nginx_http_port, 80
+
+# nginx https listen port
+set :nginx_http_port, 443
 
 # path, where unicorn pid file will be stored
 # default value: `"#{current_path}/tmp/pids/unicorn.pid"`

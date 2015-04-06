@@ -9,6 +9,8 @@ set :nginx_upload_local_certificate, true
 set :nginx_ssl_certificate_local_path, -> { ask(:nginx_ssl_certificate_local_path, "Local path to ssl certificate: ") }
 set :nginx_ssl_certificate_key_local_path, -> { ask(:nginx_ssl_certificate_key_local_path, "Local path to ssl certificate key: ") }
 set :nginx_config_path, "/etc/nginx/sites-available"
+set :nginx_http_port, 80
+set :nginx_https_port, 443
 
 set :unicorn_service_name, -> { "unicorn_#{fetch(:application)}_#{fetch(:stage)}" }
 set :unicorn_pid, -> { shared_path.join("pids/unicorn.pid") }
