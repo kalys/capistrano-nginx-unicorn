@@ -21,8 +21,8 @@ CMD="cd $APP_ROOT; bundle exec unicorn -D -c <%= fetch(:unicorn_config) %> -E <%
 # rvm
 #CMD="cd <%= current_path %>; <%= fetch(:rvm_path) %>/bin/rvm do bundle exec unicorn -D -c <%= fetch(:unicorn_config) %> -E <%= fetch(:rails_env) %>"
 
-# rbenv TODO
-# doesn't work CMD="cd <%= current_path %>; bundle exec unicorn -D -c <%= fetch(:unicorn_config) %> -E <%= fetch(:rails_env) %>"
+# Rbenv
+# CMD="cd <%= current_path %>; <%= fetch(:rbenv_path) %>/bin/rbenv exec bundle exec unicorn -D -c <%= fetch(:unicorn_config) %> -E <%= fetch(:rails_env) %>"
 
 AS_USER=<%= fetch(:unicorn_user) %>
 set -u
