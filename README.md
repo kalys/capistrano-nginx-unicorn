@@ -117,6 +117,10 @@ set :nginx_ssl_certificate_key, "#{nginx_server_name}.key"
 # default value: `/etc/nginx/sites-available`
 set :nginx_config_path, "/etc/nginx/sites-available"
 
+# nginx CORS config
+# set to `*` for wide-open CORS
+set :nginx_cors_allow_origin, "*"
+
 # path, where unicorn pid file will be stored
 # default value: `"#{current_path}/tmp/pids/unicorn.pid"`
 set :unicorn_pid, "#{current_path}/tmp/pids/unicorn.pid"

@@ -1,3 +1,7 @@
+### From 0.1.0 to 0.1.1
+
+* Add support for CORS
+
 ### From 0.0.8 to 0.1.0
 
 * Separate nginx and unicorn tasks into the appropriate files.
